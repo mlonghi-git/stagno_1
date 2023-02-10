@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml;
+using System.IO;
 
 namespace WpfApp1
 {
@@ -22,46 +14,81 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         XmlNode root = null;
+        XmlDocument doc = null;
+        FileInfo fileInfo = null;
+        string PATH_TO_FOLDER = "C:\\Users\\mlonghi\\source\\repos\\WpfApp1\\WpfApp1\\file";
+        //string FILE_NAME = null;
+
         public MainWindow()
         {
             InitializeComponent();
+            selectFileInFolder(PATH_TO_FOLDER);
         }
 
+        protected void selectFileInFolder(string directory)
+        {
+
+            try
+            {
+                // recupera file della cartella
+                string[] files = Directory.GetFiles(directory);
+                foreach (string file in files)
+                {
+                    fileListBox.Items.Add(Path.GetFileName(file));
+                }
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                MessageBox.Show("Folder not found");
+            }
+
+
+        }
+
+        private void fileListBox_getXMLFromList(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            string filePath = PATH_TO_FOLDER + "\\" + fileListBox.SelectedItem.ToString();
+            if(File.Exists(filePath))
+            {
+                string content = File.ReadAllText(filePath);
+                fileInfo = new FileInfo(filePath);
+                root = this.createXml(content);
+                this.createResGrid(root);
+            }
+            else
+            {
+                MessageBox.Show("file non trovato");
+            }
+        }
         protected void Button_Click(Object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
 
-            // Launch OpenFileDialog by calling ShowDialog method
             Nullable<bool> result = openFileDlg.ShowDialog(); 
-            // Get the selected file name and display in a TextBox.
-            // Load content of file in a TextBlock
+            
             if (result == true)
             {
                 FileNameTextBox.Text = openFileDlg.FileName;
-                //TextBlock1.Text = System.IO.File.ReadAllText(openFileDlg.FileName);
-                XmlNode root = this.createXml(openFileDlg);
                 this.createResGrid(root);
-
-                //XmlNode myNode = root.SelectSingleNode("descendant::Serial/Value");
-                //myNode.InnerText = "blabla";
-                //TextBlock1.Text = doc.InnerXml.ToString();
             }
         }
 
-        protected XmlNode createXml(Microsoft.Win32.OpenFileDialog file)
+        protected XmlDocument createXml(string fileContent)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(file.FileName);
-            root = doc.DocumentElement;
-            return root;
+            doc = new XmlDocument();
+            doc.LoadXml(fileContent);
+            return doc;
         }
 
         // dal root prende i vari res e genera i campi testo e input
         protected void createResGrid(XmlNode root)
         {
+            // reset gridRes
+            gridRes.ColumnDefinitions.Clear();
+            gridRes.RowDefinitions.Clear();
+            gridRes.Children.Clear();
+
             XmlNodeList nodeList = root.SelectNodes("descendant::Step/Res");
-
-
             gridRes.ColumnDefinitions.Add(new ColumnDefinition());
             gridRes.ColumnDefinitions.Add(new ColumnDefinition());
             gridRes.ColumnDefinitions.Add(new ColumnDefinition());
@@ -137,10 +164,33 @@ namespace WpfApp1
                 {
                     if (txtb.Name.StartsWith("serial_"))
                     {
-                        var TBD = txtb.Text;
+                        var serialValue = txtb.Text;
+                        XmlNode serialNode = doc.SelectSingleNode("//Serial");
+                        XmlNode valueNode = serialNode.FirstChild;
+                        if(valueNode.InnerText == "")
+                        {
+                            valueNode.InnerText = serialValue;
+                        }
+                        else
+                        {
+                            XmlElement newChild = doc.CreateElement("Value");
+                            newChild.InnerText = serialValue.ToString();
+                            serialNode.AppendChild(newChild);
+                        }
                     }
                 }
-
+                try
+                {
+                    string fileNameWithoutExtension = fileInfo.Name.Replace(fileInfo.Extension, "");
+                    string newFileName = fileInfo.Directory + "\\" + fileNameWithoutExtension + "_" + DateTime.Now.ToString("yyyyMMddTHHmmss") + fileInfo.Extension;
+                    doc.Save(newFileName);
+                    MessageBox.Show("File " + newFileName + " salvato correttamente");
+                }
+                catch (XmlException)
+                {
+                    MessageBox.Show("Errore salvataggio file");
+                }
+                
                 // salvato per dopo per salvare file
                 //Microsoft.Win32.SaveFileDialog saveFileDlg = new Microsoft.Win32.SaveFileDialog();
                 //Nullable<bool> result = saveFileDlg.ShowDialog();
@@ -158,5 +208,7 @@ namespace WpfApp1
 
             
         }
+
+        
     }
 }
