@@ -16,13 +16,15 @@ namespace WpfApp1
         XmlNode root = null;
         XmlDocument doc = null;
         FileInfo fileInfo = null;
-        string PATH_TO_FOLDER = "C:\\Users\\mlonghi\\source\\repos\\WpfApp1\\WpfApp1\\file";
-        //string FILE_NAME = null;
+        string folderPath = null;
 
         public MainWindow()
         {
             InitializeComponent();
-            selectFileInFolder(PATH_TO_FOLDER);
+            folderPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            // folder che contiene i file
+            folderPath += "\\file";
+            selectFileInFolder(folderPath);
         }
 
         protected void selectFileInFolder(string directory)
@@ -30,7 +32,6 @@ namespace WpfApp1
 
             try
             {
-                // recupera file della cartella
                 string[] files = Directory.GetFiles(directory);
                 foreach (string file in files)
                 {
@@ -47,7 +48,7 @@ namespace WpfApp1
 
         private void fileListBox_getXMLFromList(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            string filePath = PATH_TO_FOLDER + "\\" + fileListBox.SelectedItem.ToString();
+            string filePath = folderPath + "\\" + fileListBox.SelectedItem.ToString();
             if(File.Exists(filePath))
             {
                 string content = File.ReadAllText(filePath);
