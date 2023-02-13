@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,16 +15,28 @@ namespace WpfApp1;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private XmlNode root;
-    private XmlDocument doc;
-    private FileInfo fileInfo;
-    private readonly string folderPath;
+    private XmlNode _root;
+    private XmlDocument _doc;
+    private FileInfo _fileInfo;
+    private readonly string _fileFolderPath;
+    private readonly string _outFolderPath
+        ;
 
     public MainWindow()
     {
         InitializeComponent();
-        folderPath = DirectoryHelper.GetFolderPath();
-        LoadFilesFromFolder(folderPath);
+        _fileFolderPath = DirectoryHelper.GetInputFolderPath();
+        _outFolderPath = DirectoryHelper.GetOutputFolderPath();
+        LoadFilesFromFolder(_fileFolderPath);
+
+        var timer = new Timer(1 * 1000);
+        timer.Elapsed += Timer_Elapsed;
+        timer.Start();
+    }
+
+    private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+    {
+        LoadFilesFromFolder(_fileFolderPath);
     }
 
 
@@ -37,8 +50,16 @@ public partial class MainWindow : Window
         try
         {
             var files = Directory.GetFiles(directory);
-            foreach (var file in files)
-                fileListBox.Items.Add(Path.GetFileName(file));
+            if (files.Length <= 0)
+                return;
+
+            Array.Sort(files, (a, b) => File.GetCreationTime(b).CompareTo(File.GetCreationTime(a)));
+            var latestFile = Path.GetFileName(files[0]);
+
+            fileListBox.Dispatcher.Invoke(() => {
+                fileListBox.Items.Clear();
+                fileListBox.Items.Add(latestFile);
+            });
         }
         catch (DirectoryNotFoundException)
         {
@@ -46,15 +67,17 @@ public partial class MainWindow : Window
         }
     }
 
+
+
     private void FileListBox_getXMLFromList(object sender, MouseButtonEventArgs e)
     {
-        var filePath = folderPath + "\\" + fileListBox.SelectedItem;
+        var filePath = _fileFolderPath + "\\" + fileListBox.SelectedItem;
         if (File.Exists(filePath))
         {
             var content = File.ReadAllText(filePath);
-            fileInfo = new FileInfo(filePath);
-            root = CreateXml(content);
-            CreateResGrid(root);
+            _fileInfo = new FileInfo(filePath);
+            _root = CreateXml(content);
+            CreateResGrid(_root);
         }
         else
         {
@@ -64,9 +87,9 @@ public partial class MainWindow : Window
 
     private XmlDocument CreateXml(string fileContent)
     {
-        doc = new XmlDocument();
-        doc.LoadXml(fileContent);
-        return doc;
+        _doc = new XmlDocument();
+        _doc.LoadXml(fileContent);
+        return _doc;
     }
 
     // dal root prende i vari res e genera i campi testo e input
@@ -140,13 +163,13 @@ public partial class MainWindow : Window
             var textBoxes = gridRes.Children.OfType<TextBox>().ToList();
             foreach (var tBox in textBoxes)
             {
-                if (!tBox.Name.StartsWith("serial_")) 
+                if (!tBox.Name.StartsWith("serial_"))
                     continue;
 
                 var serialValue = tBox.Text;
                 var num = int.Parse(tBox.Name.Replace("serial_", ""));
-                var stepNode = doc.SelectSingleNode($"//Step[Num='{num}']");
-                var serialNode = doc.CreateElement("Serial");
+                var stepNode = _doc.SelectSingleNode($"//Step[Num='{num}']");
+                var serialNode = _doc.CreateElement("Serial");
                 serialNode.InnerText = serialValue;
                 stepNode.AppendChild(serialNode);
             }
@@ -164,15 +187,13 @@ public partial class MainWindow : Window
     {
         try
         {
-            var fileNameWithoutExtension = fileInfo.Name.Replace(fileInfo.Extension, "");
-            var newFileName = fileInfo.Directory + "\\" + fileNameWithoutExtension + "_" +
-                              DateTime.Now.ToString("yyyyMMddTHHmmss") + fileInfo.Extension;
-            doc.Save(newFileName);
-            MessageBox.Show("File " + newFileName + " salvato correttamente");
+            var fileNameWithoutExtension = _fileInfo.Name.Replace(_fileInfo.Extension, "");
+            var newFileName = Path.Combine(_outFolderPath, $"{fileNameWithoutExtension}{DateTime.Now:yyyyMMddTHHmmss}{_fileInfo.Extension}");
+            _doc.Save(newFileName);
         }
         catch (XmlException)
         {
-            MessageBox.Show("Errore salvataggio file");
+            MessageBox.Show("Error saving file.");
         }
     }
 }
