@@ -8,8 +8,8 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid x:Name="gridRes" HorizontalAlignment="Left" Height="370" Margin="350,0,0,20" VerticalAlignment="Bottom" Width="335"/>
-        <ListBox x:Name="fileListBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="30,44,475,20" MouseDoubleClick="fileListBox_getXMLFromList" />
-        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Left" Margin="700,175,0,0" VerticalAlignment="Top" Width="75" Click="fillXmlWithSerialsButton_Click" Height="75" Visibility="Hidden"/>
+        <ListBox x:Name="fileListBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="30,44,475,20" MouseDoubleClick="FileListBox_getXMLFromList" />
+        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Left" Margin="700,175,0,0" VerticalAlignment="Top" Width="75" Click="FillXmlWithSerialsButton_Click" Height="75" Visibility="Hidden"/>
         <TextBox HorizontalAlignment="Left" Margin="30,21,0,0" TextWrapping="Wrap" Text="File Listing" VerticalAlignment="Top" Width="295" TextAlignment="Center"/>
     </Grid>
 </Window>
