@@ -49,7 +49,7 @@ namespace WpfApp1
         private void fileListBox_getXMLFromList(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             string filePath = folderPath + "\\" + fileListBox.SelectedItem.ToString();
-            if(File.Exists(filePath))
+            if (File.Exists(filePath))
             {
                 string content = File.ReadAllText(filePath);
                 fileInfo = new FileInfo(filePath);
@@ -61,19 +61,6 @@ namespace WpfApp1
                 MessageBox.Show("file non trovato");
             }
         }
-        protected void Button_Click(Object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog openFileDlg = new Microsoft.Win32.OpenFileDialog();
-
-            Nullable<bool> result = openFileDlg.ShowDialog(); 
-            
-            if (result == true)
-            {
-                FileNameTextBox.Text = openFileDlg.FileName;
-                this.createResGrid(root);
-            }
-        }
-
         protected XmlDocument createXml(string fileContent)
         {
             doc = new XmlDocument();
@@ -149,14 +136,10 @@ namespace WpfApp1
 
             }
 
-
-            Button fillXmlWithSerialsButton = new Button();
-            fillXmlWithSerialsButton.Content = "invio";
-            fillXmlWithSerialsButton.Click += fillXmlWithSerialsButton_Click;
-            gridRes.Children.Add(fillXmlWithSerialsButton);
-
+            sendButton.Visibility = Visibility.Visible;
         }
-        protected void fillXmlWithSerialsButton_Click(object sender, EventArgs e)
+
+        private void fillXmlWithSerialsButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -168,7 +151,7 @@ namespace WpfApp1
                         var serialValue = txtb.Text;
                         XmlNode serialNode = doc.SelectSingleNode("//Serial");
                         XmlNode valueNode = serialNode.FirstChild;
-                        if(valueNode.InnerText == "")
+                        if (valueNode.InnerText == "")
                         {
                             valueNode.InnerText = serialValue;
                         }
@@ -180,36 +163,29 @@ namespace WpfApp1
                         }
                     }
                 }
-                try
-                {
-                    string fileNameWithoutExtension = fileInfo.Name.Replace(fileInfo.Extension, "");
-                    string newFileName = fileInfo.Directory + "\\" + fileNameWithoutExtension + "_" + DateTime.Now.ToString("yyyyMMddTHHmmss") + fileInfo.Extension;
-                    doc.Save(newFileName);
-                    MessageBox.Show("File " + newFileName + " salvato correttamente");
-                }
-                catch (XmlException)
-                {
-                    MessageBox.Show("Errore salvataggio file");
-                }
-                
-                // salvato per dopo per salvare file
-                //Microsoft.Win32.SaveFileDialog saveFileDlg = new Microsoft.Win32.SaveFileDialog();
-                //Nullable<bool> result = saveFileDlg.ShowDialog();
-                //if (result == true)
-                //{
-                //    root.OwnerDocument.Save(saveFileDlg.FileName);
-                //}
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
 
-            
-
-            
+            sendFile();
         }
 
-        
+        //sarà da modificare con invio su cartella di rete
+        private void sendFile()
+        {
+            try
+            {
+                string fileNameWithoutExtension = fileInfo.Name.Replace(fileInfo.Extension, "");
+                string newFileName = fileInfo.Directory + "\\" + fileNameWithoutExtension + "_" + DateTime.Now.ToString("yyyyMMddTHHmmss") + fileInfo.Extension;
+                doc.Save(newFileName);
+                MessageBox.Show("File " + newFileName + " salvato correttamente");
+            }
+            catch (XmlException)
+            {
+                MessageBox.Show("Errore salvataggio file");
+            }
+        }
     }
 }
