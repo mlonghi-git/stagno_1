@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Xml;
 
 namespace WpfApp1.Utilities
 {
@@ -8,7 +9,8 @@ namespace WpfApp1.Utilities
     {
         internal static string GetInputFolderPath()
         {
-            var folderPath = GenerateFileFolder();
+            var folderPath = ReadConfigFile("input");
+            //var folderPath = GenerateFileFolder();
             CreateFolderIfNotExists(folderPath);
             return folderPath;
         }
@@ -22,10 +24,11 @@ namespace WpfApp1.Utilities
 
         internal static string GetOutputFolderPath()
         {
-            var folderPath = GenerateFileFolder();
-            var outputFolderPath = Path.Combine(folderPath, "Out");
-            CreateFolderIfNotExists(outputFolderPath);
-            return outputFolderPath;
+            var folderPath = ReadConfigFile("output");
+            //var folderPath = GenerateFileFolder();
+            //var outputFolderPath = Path.Combine(folderPath, "Out");
+            //CreateFolderIfNotExists(folderPath);
+            return folderPath;
         }
 
         private static void CreateFolderIfNotExists(string folderPath)
@@ -40,5 +43,21 @@ namespace WpfApp1.Utilities
                 Console.WriteLine("Folder already exists: " + folderPath);
             }
         }
+
+        private static string ReadConfigFile(string configXPath)
+        {
+            var files = Directory.GetFiles("./config");
+            var fileContent = File.ReadAllText(files[0]);
+
+            // come riusare CreateXml?
+            XmlDocument root = new XmlDocument();
+            root.LoadXml(fileContent);
+            var node = root.SelectSingleNode("descendant::config/" + configXPath);
+            return node.InnerText;
+
+
+        }
+
+
     }
 }

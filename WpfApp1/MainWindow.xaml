@@ -5,11 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" WindowStartupLocation="CenterScreen" WindowState="Maximized" d:DesignHeight="735" d:DesignWidth="1100">
     <Grid>
-        <Grid x:Name="gridRes" HorizontalAlignment="Left" Height="370" Margin="350,0,0,20" VerticalAlignment="Bottom" Width="335"/>
-        <ListBox x:Name="fileListBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="30,44,475,20" MouseDoubleClick="FileListBox_getXMLFromList" />
-        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Left" Margin="700,175,0,0" VerticalAlignment="Top" Width="75" Click="FillXmlWithSerialsButton_Click" Height="75" Visibility="Hidden"/>
-        <TextBox HorizontalAlignment="Left" Margin="30,21,0,0" TextWrapping="Wrap" Text="File Listing" VerticalAlignment="Top" Width="295" TextAlignment="Center"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" MinWidth="200"/>
+            <ColumnDefinition Width="3*" MinWidth="470"/>
+            <ColumnDefinition Width="1*" MinWidth="100"/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Margin="35,93,35,10" Grid.Column="1">
+            <Grid x:Name="gridRes" HorizontalAlignment="Left" Margin="20,10,20,20" Width="410" Grid.Column="1"/>
+        </ScrollViewer>
+        <ListBox x:Name="fileListBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="30,44,10,647" MouseDoubleClick="FileListBox_getXMLFromList" Visibility="Hidden" />
+        <Button x:Name="sendButton" Content="Send" HorizontalAlignment="Center" VerticalAlignment="Top" Width="140" Click="FillXmlWithSerialsButton_Click" Height="75" Grid.Column="2" Margin="0,175,0,0"/>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="70,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="115" Height="25" FontSize="20"><Run Language="it-it" Text="Work Order"/><LineBreak/><Run Language="it-it"/></TextBlock>
+        <TextBlock Grid.Column="1" HorizontalAlignment="Left" Margin="70,61,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="105" Height="25" FontSize="20"><Run Language="it-it" Text="Op ID"/></TextBlock>
+        <TextBlock x:Name="TBox_WorkOrder" Grid.Column="1" HorizontalAlignment="Left" Margin="200,36,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="115" Height="25" FontSize="20" Text=""/>
+        <TextBox x:Name="TBox_OpID" Grid.Column="1" HorizontalAlignment="Left" Margin="200,62,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="115" Height="25" FontSize="20" Text=""/>
     </Grid>
 </Window>
