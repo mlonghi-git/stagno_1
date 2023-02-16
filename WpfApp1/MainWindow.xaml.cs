@@ -69,6 +69,7 @@ public partial class MainWindow : Window
                     fileListBox.Items.Clear();
                     fileListBox.Items.Add(latestFile);
                     ManualGetXml(latestFile);
+                    Application.Current.MainWindow.Activate();
                 });
             }
 
