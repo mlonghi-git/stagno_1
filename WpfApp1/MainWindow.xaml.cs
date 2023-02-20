@@ -19,7 +19,7 @@ public partial class MainWindow : Window
     private XmlNode _root;
     private XmlDocument _doc;
     private FileInfo _fileInfo;
-    private List<DateTime> _fileDateList = new List<DateTime>();
+    private readonly List<DateTime> _fileDateList = new();
     private readonly string _fileFolderPath;
     private readonly string _outFolderPath;
 
@@ -78,7 +78,7 @@ public partial class MainWindow : Window
                 fileListBox.Items.Clear();
                 fileListBox.Items.Add(latestFile);
                 ManualGetXml(latestFile);
-                Application.Current.MainWindow.Activate();
+                MakeWindowImportant();
             });
 
 
@@ -87,6 +87,14 @@ public partial class MainWindow : Window
         {
             MessageBox.Show("Folder not found");
         }
+    }
+
+    private static void MakeWindowImportant()
+    {
+
+        var currentWindow = Application.Current.MainWindow;
+        currentWindow.WindowState = WindowState.Maximized;
+        currentWindow.Activate();
     }
 
     private bool FileAlreadyInList(string[] files)
