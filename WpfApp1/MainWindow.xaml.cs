@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Xml;
 using WpfApp1.Utilities;
 
@@ -55,25 +52,36 @@ public partial class MainWindow : Window
         {
             var files = Directory.GetFiles(directory);
             if (files.Length <= 0)
-                return;
-
-            Array.Sort(files, (a, b) => File.GetCreationTime(b).CompareTo(File.GetCreationTime(a)));
-            var latestFile = Path.GetFileName(files[0]);
-            if (!FileAlreadyInList(files))
             {
-                _fileDateList.Clear();
-                _fileDateList.Add(File.GetCreationTime(files[0]));
 
                 fileListBox.Dispatcher.Invoke(() =>
                 {
+                    _fileDateList.Clear();
                     fileListBox.Items.Clear();
-                    fileListBox.Items.Add(latestFile);
-                    ManualGetXml(latestFile);
-                    Application.Current.MainWindow.Activate();
+                    ResetInterface();
                 });
+              
+                return;
             }
 
-           
+            Array.Sort(files, (a, b) => File.GetCreationTime(b).CompareTo(File.GetCreationTime(a)));
+            var latestFile = Path.GetFileName(files[0]);
+
+            if (FileAlreadyInList(files))
+                return;
+
+            _fileDateList.Clear();
+            _fileDateList.Add(File.GetCreationTime(files[0]));
+
+            fileListBox.Dispatcher.Invoke(() =>
+            {
+                fileListBox.Items.Clear();
+                fileListBox.Items.Add(latestFile);
+                ManualGetXml(latestFile);
+                Application.Current.MainWindow.Activate();
+            });
+
+
         }
         catch (DirectoryNotFoundException)
         {
@@ -133,7 +141,7 @@ public partial class MainWindow : Window
         gridRes.Children.Clear();
 
         var headerSerialNode = root.SelectSingleNode("//Serial/Value");
-        if (headerSerialNode != null) { TBox_WorkOrder.Text= headerSerialNode.InnerText; }
+        if (headerSerialNode != null) { TBox_WorkOrder.Text = headerSerialNode.InnerText; }
 
         var nodeList = root.SelectNodes("descendant::Step/Res");
         gridRes.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(40) });
@@ -153,8 +161,10 @@ public partial class MainWindow : Window
         gridRes.Children.Add(labelHeaderRes);
 
         // header serial
-        var labelHeaderSerial = new TextBlock { 
-            Text = "Serial" };
+        var labelHeaderSerial = new TextBlock
+        {
+            Text = "Serial"
+        };
         Grid.SetRow(labelHeaderSerial, 0);
         Grid.SetColumn(labelHeaderSerial, 2);
         gridRes.Children.Add(labelHeaderSerial);
@@ -164,8 +174,8 @@ public partial class MainWindow : Window
         var curRow = 1;
         foreach (XmlNode node in nodeList)
         {
-            var labelNumber = new TextBlock 
-            { 
+            var labelNumber = new TextBlock
+            {
                 Text = curRow.ToString(),
                 FontSize = 20,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -193,7 +203,7 @@ public partial class MainWindow : Window
                 HorizontalContentAlignment = HorizontalAlignment.Center,
                 VerticalContentAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(5, 5, 0, 0),
-                
+
             };
             Grid.SetRow(serialTextBox, curRow);
             Grid.SetColumn(serialTextBox, 2);
@@ -220,7 +230,7 @@ public partial class MainWindow : Window
                 var serialNode = _doc.SelectSingleNode($"//Serial");
                 var opNode = _doc.CreateElement("Op");
                 opNode.InnerText = opIdTBox;
-                serialNode.AppendChild(opNode); 
+                serialNode.AppendChild(opNode);
             }
 
             var textBoxes = gridRes.Children.OfType<TextBox>().ToList();
@@ -237,7 +247,7 @@ public partial class MainWindow : Window
                     var serNode = _doc.CreateElement("Ser");
                     serNode.InnerText = serialValue;
                     stepNode.AppendChild(serNode);
-                } 
+                }
             }
         }
         catch (Exception ex)
