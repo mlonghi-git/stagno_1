@@ -257,13 +257,26 @@ public partial class MainWindow : Window
             var newFileName = Path.Combine(_outFolderPath, $"{fileNameWithoutExtension}{DateTime.Now:yyyyMMddTHHmmss}{_fileInfo.Extension}");
 
             //NetworkCredential credentials = new NetworkCredential("mirko", "Admin123!");
-            System.IO.File.WriteAllText(newFileName, _doc.InnerXml);           
+            System.IO.File.WriteAllText(newFileName, _doc.InnerXml);
+            ResetInterface();
+            // TODO 
+            // eliminare file da cartella /in se serve
+            MessageBox.Show("File saved");
             //_doc.Save(newFileName);
         }
         catch (XmlException)
         {
             MessageBox.Show("Error saving file.");
         }
+    }
+
+    private void ResetInterface()
+    {
+        gridRes.ColumnDefinitions.Clear();
+        gridRes.RowDefinitions.Clear();
+        gridRes.Children.Clear();
+        TBox_OpID.Clear();
+        TBox_WorkOrder.Text = "";
     }
 }
 
